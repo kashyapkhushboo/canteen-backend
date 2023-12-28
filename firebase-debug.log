@@ -1,0 +1,43 @@
+[debug] [2023-12-28T07:28:01.998Z] ----------------------------------------------------------------------
+[debug] [2023-12-28T07:28:01.999Z] Command:       /usr/bin/node /usr/local/bin/firebase emulators:start
+[debug] [2023-12-28T07:28:02.000Z] CLI Version:   13.0.2
+[debug] [2023-12-28T07:28:02.000Z] Platform:      linux
+[debug] [2023-12-28T07:28:02.000Z] Node Version:  v18.17.1
+[debug] [2023-12-28T07:28:02.000Z] Time:          Thu Dec 28 2023 12:58:02 GMT+0530 (India Standard Time)
+[debug] [2023-12-28T07:28:02.000Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2023-12-28T07:28:02.136Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2023-12-28T07:28:02.136Z] > authorizing via signed-in user (khush28528@gmail.com)
+[info] i  emulators: Starting emulators: hosting {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: hosting"}}
+[debug] [2023-12-28T07:28:02.141Z] [logging] Logging Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[warn] ⚠  hosting: Hosting Emulator unable to start on port 5000, starting on 5002 instead. {"metadata":{"emulator":{"name":"hosting"},"message":"Hosting Emulator unable to start on port 5000, starting on 5002 instead."}}
+[debug] [2023-12-28T07:28:02.142Z] [hosting] Hosting Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2023-12-28T07:28:02.142Z] assigned listening specs for emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"hosting":[{"address":"127.0.0.1","family":"IPv4","port":5002}]},"metadata":{"message":"assigned listening specs for emulators"}}
+[debug] [2023-12-28T07:28:02.147Z] [hub] writing locator at /tmp/hub-seasia-cafe-c92de.json
+[debug] [2023-12-28T07:28:02.161Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/seasia-cafe-c92de/sites 
+[debug] [2023-12-28T07:28:03.452Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/seasia-cafe-c92de/sites 200
+[debug] [2023-12-28T07:28:03.453Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/seasia-cafe-c92de/sites {"sites":[{"name":"projects/seasia-cafe-c92de/sites/seasia-cafe-c92de","defaultUrl":"https://seasia-cafe-c92de.web.app","type":"DEFAULT_SITE"}]}
+[debug] [2023-12-28T07:28:03.454Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/seasia-cafe-c92de/webApps/-/config [none]
+[debug] [2023-12-28T07:28:04.439Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/seasia-cafe-c92de/webApps/-/config 200
+[debug] [2023-12-28T07:28:04.439Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/seasia-cafe-c92de/webApps/-/config {"projectId":"seasia-cafe-c92de","appId":"1:645898329738:web:8516ac1bc2fb2363ff5773","storageBucket":"seasia-cafe-c92de.appspot.com","apiKey":"AIzaSyBVT8vgeRyRESpQRVGeq7Xs2ZrVqJNOn88","authDomain":"seasia-cafe-c92de.firebaseapp.com","messagingSenderId":"645898329738","measurementId":"G-RBXBH81N3L"}
+[debug] [2023-12-28T07:28:04.485Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/seasia-cafe-c92de [none]
+[debug] [2023-12-28T07:28:04.996Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/seasia-cafe-c92de 200
+[debug] [2023-12-28T07:28:04.996Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/seasia-cafe-c92de {"projectId":"seasia-cafe-c92de","projectNumber":"645898329738","displayName":"seasia-cafe","name":"projects/seasia-cafe-c92de","resources":{"hostingSite":"seasia-cafe-c92de"},"state":"ACTIVE","etag":"1_ba2e6cfc-8444-4a56-aeeb-b1b9bf4eee52"}
+[info] i  hosting[seasia-cafe-c92de]: Serving hosting files from: public {"metadata":{"emulator":{"name":"hosting"},"message":"Serving hosting files from: \u001b[1mpublic\u001b[22m"}}
+[info] ✔  hosting[seasia-cafe-c92de]: Local server: http://127.0.0.1:5002 {"metadata":{"emulator":{"name":"hosting"},"message":"Local server: \u001b[4m\u001b[1mhttp://127.0.0.1:5002\u001b[22m\u001b[24m"}}
+[warn] ⚠  emulators: The Emulator UI is not starting, either because none of the running emulators have a UI component or the Emulator UI cannot determine the Project ID. Pass the --project flag to specify a project. {"metadata":{"emulator":{"name":"hub"},"message":"The Emulator UI is not starting, either because none of the running emulators have a UI component or the Emulator UI cannot determine the Project ID. Pass the --project flag to specify a project."}}
+[info] 
+┌─────────────────────────────────────────────────────────────┐
+│ ✔  All emulators ready! It is now safe to connect your app. │
+└─────────────────────────────────────────────────────────────┘
+
+┌──────────┬────────────────┐
+│ Emulator │ Host:Port      │
+├──────────┼────────────────┤
+│ Hosting  │ 127.0.0.1:5002 │
+└──────────┴────────────────┘
+  Emulator Hub running at 127.0.0.1:4400
+  Other reserved ports: 4500
+
+Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
+ 

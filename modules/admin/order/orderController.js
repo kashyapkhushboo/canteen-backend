@@ -16,38 +16,67 @@ const { log } = require("console");
 const addOrder = async (req, res) => {
   try {
     let orderDetails = req.body;
-    console.log(orderDetails);
+
+    console.log("add-order", orderDetails);
     let orderData = {
-      emp_id: orderDetails.emp_id,
+      emp_id: req.emp.emp_id,
       order_rec: orderDetails.order_rec,
     };
 
-    const requiredFeilds = { order_rec: orderDetails.order_rec };
-
+    const requiredFeilds = {
+      order_rec: orderDetails.order_rec,
+    };
     let error = validator.isRequired(requiredFeilds);
     if (error.length != 0) {
-      return res.status(400).json({ statusCode: 400, error: error });
+      return res.status(400).json({
+        statusCode: 400,
+        error: error,
+      });
     } else {
+
       let totalBalance = 0;
-      for (let i = 0; i < orderDetails.order_rec.length; i++) {
-        if (!orderDetails.order_rec[i].item_type) {
-          let subMenuDetails = await subMenuModel.findOne({
-            _id: orderDetails.order_rec[i].itemId,
+
+      for (let i = 0; i < orderData.order_rec.length; i++) {
+        console.log(orderData.order_rec[i],"looooop");
+        console.log(orderData.order_rec[i].itemId,"oooooooooooo");
+
+        if (orderData.order_rec[i].itemId) {
+          // If itemId is present, validate using itemId
+        isSubMenuValid = await subMenuModel.findOne({
+            _id: orderData.order_rec[i].itemId,
           });
-
-          let perItemBalance =
-            subMenuDetails.price * orderDetails.order_rec[i].quantity;
-          orderData.order_rec[i]["price"] = subMenuDetails.price;
-          orderData.order_rec[i]["totalPrice"] = perItemBalance;
-          orderData.order_rec[i]["item_name"] = subMenuDetails.item_name;
-          totalBalance = totalBalance + perItemBalance;
-        } else if (orderDetails.order_rec[0].item_type === "custom") {
-          totalBalance += orderData.order_rec[i].price;
+          console.log(isSubMenuValid,"iddddddddddddddd");
+        
+        } else {
+          // If itemId is not present, validate using menuId and item_name
+          isSubMenuValid = await subMenuModel.findOne({
+            menu_id: orderData.order_rec[i].menu_id,
+            item_name:orderData.order_rec[i].item_name,
+          });
+console.log(isSubMenuValid,"menuuuuuuuuuuuuuuuuuuu");
         }
-      }
 
-      orderData.totalBalance = totalBalance;
+        if (!isSubMenuValid) {
+          return res
+            .status(400)
+            .json({ error: `Item '${orderData.order_rec[i].item_name}' you have added in the order is invalid.` });
+        }
+
+        
+        let perItemBalance =
+        isSubMenuValid.price * orderDetails.order_rec[i].quantity;
+      orderData.order_rec[i]["price"] = isSubMenuValid.price;
+      orderData.order_rec[i]["totalPrice"] = perItemBalance;
+      orderData.order_rec[i]["item_name"] = isSubMenuValid.item_name;
+      console.log(perItemBalance,"perrrrrrrrrr");
+      totalBalance = totalBalance + perItemBalance;
+      console.log(totalBalance,"totalllllllllllllllll");
+    }
+    orderData.totalBalance = totalBalance;
+      
+
       let empDetails = await EmpModel.findOne({ EmployeeId: req.emp.emp_id });
+
       if (empDetails.role === "admin") {
         if (!req.body.emp_id) {
           return res.status(400).json({
@@ -57,16 +86,16 @@ const addOrder = async (req, res) => {
         }
 
         let userDetails = await EmpModel.findOne({
-          EmployeeId: orderDetails.emp_id,
+          EmployeeId: req.body.emp_id,
         });
 
         if (!userDetails) {
           return res.status(404).json({ error: "Invalid employee id." });
         }
+
         let fullName = `${userDetails.FirstName}`;
         if (userDetails.LastName) fullName += ` ${userDetails.LastName}`;
         orderData.fullName = fullName;
-
         orderData.emp_id = req.body.emp_id;
         orderData.order_status = "confirm";
         orderData.bill_status = "unpaid";
@@ -90,6 +119,50 @@ const addOrder = async (req, res) => {
           });
         }
 
+        const io = req.io;
+        console.log("Global socketIds:", global.socketIds);
+
+        const targetSockets = global.socketIds.filter(
+          (entry) => entry.userId == userDetails.EmployeeId
+        );
+
+        console.log("EmployeeId:", userDetails.EmployeeId);
+        console.log("Target Sockets:", targetSockets);
+
+        const message = ` An order has been placed for ${userDetails.FirstName} by the admin.`;
+
+        if (targetSockets.length > 0) {
+          targetSockets.forEach((targetSocket) => {
+            io.to(targetSocket.socketId).emit("notification", message);
+            console.log(
+              `Notification sent to user with ID: ${userDetails.EmployeeId}`
+            );
+
+            // Save the notification to the database
+            const result = new Notification({
+              userId: targetSocket.userId,
+              message,
+            });
+
+            result
+              .save()
+              .then((savedNotification) => {
+                console.log(
+                  "Notification saved to the database:",
+                  savedNotification
+                );
+              })
+              .catch((error) => {
+                console.error(
+                  "Error saving notification to the database:",
+                  error
+                );
+              });
+          });
+        } else {
+          console.log(`User with ID ${empDetails.EmployeeId} not found.`);
+        }
+
         await confirmOrder(userDetails.email, result);
         return res.status(200).json({
           statusCode: 200,
@@ -100,12 +173,11 @@ const addOrder = async (req, res) => {
         let fullName = `${empDetails.FirstName}`;
         if (empDetails.LastName) fullName += ` ${empDetails.LastName}`;
         orderData.fullName = fullName;
-
         orderData.emp_id = req.emp.emp_id;
         orderData.order_status = "pending";
         orderData.bill_status = "unpaid";
-        const newOrder = new orderModel(orderData);
 
+        const newOrder = new orderModel(orderData);
         const io = req.io;
 
         console.log("Global socketIds:", global.socketIds);
@@ -123,7 +195,7 @@ const addOrder = async (req, res) => {
         console.log("Target Sockets:", targetSockets);
 
         if (targetSockets.length > 0) {
-          const message = `A new order has been placed by the ${empDetails.FirstName}. Please review the order.`;
+          const message = `A new order has been placed by the ${empDetails.FirstName}. Please review the order. `;
 
           targetSockets.forEach((targetSocket) => {
             io.to(targetSocket.socketId).emit("notification", message);
@@ -155,7 +227,6 @@ const addOrder = async (req, res) => {
         } else {
           console.log(`No matching admin users found in targetSockets.`);
         }
-
         let result = await newOrder.save();
         return res.status(200).json({
           statusCode: 200,
@@ -165,13 +236,13 @@ const addOrder = async (req, res) => {
       }
     }
   } catch (err) {
-    console.error("Error: ", err.message);
     return res.status(500).json({
       statusCode: 500,
       error: err.message,
     });
   }
 };
+
 
 //without custom order
 
