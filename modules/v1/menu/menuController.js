@@ -1,6 +1,6 @@
 //============================REQUIRE MONGOOSE====================================================================
 const { menuModel } = require("../../../models/menuModel");
-const validator = require("../../../middlewares/validations");
+const validator = require("../../../helper/validations");
 //=============================LIST ALL MENUS====================================================================
 const listMenu = async (req, res, next) => {
   try {

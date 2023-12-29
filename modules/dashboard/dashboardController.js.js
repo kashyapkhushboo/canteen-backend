@@ -2,9 +2,8 @@ const { EmpModel } = require("../../models/empDetailsModel");
 const { orderModel } = require("../../models/ordersModel");
 const { subMenuModel } = require("../../models/subMenuModel");
 
-const Count = async (req, res, next) => {
+const count = async (req, res, next) => {
   try {
-
     let totalUsers = await EmpModel.countDocuments();
 
     let totalMenuItems = await subMenuModel.countDocuments();
@@ -36,7 +35,7 @@ const Count = async (req, res, next) => {
               },
             },
           ])
-          .exec()
+          .exec(),
       ]);
 
     return res.status(200).json({
@@ -61,34 +60,4 @@ const Count = async (req, res, next) => {
   }
 };
 
-const balance = async (req, res, next) => {
-  try {
-    const result = await orderModel
-      .aggregate([
-        {
-          $unwind: "$order_rec",
-        },
-        {
-          $group: {
-            _id: "$order_rec.item_name",
-            count: { $sum: 1 },
-          },
-        },
-        {
-          $sort: {
-            count: -1, // Sort in descending order
-          },
-        },
-      ])
-      .exec();
-
-    console.log(result, "khushiiiiiiiii");
-  } catch (err) {
-    return res.status(500).json({
-      statusCode: 500,
-      error: err.message,
-    });
-  }
-};
-
-module.exports = { Count, balance };
+module.exports = { count };

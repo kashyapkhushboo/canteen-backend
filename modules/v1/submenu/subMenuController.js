@@ -1,7 +1,7 @@
 //============================REQUIRE MONGOOSE====================================================================
 const { menuModel } = require("../../../models/menuModel");
 const { subMenuModel } = require("../../../models/subMenuModel");
-const validator = require("../../../middlewares/validations");
+const validator = require("../../../helper/validations");
 
 //=============================LIST ALL Sub MENUS====================================================================
 
@@ -15,15 +15,15 @@ const validator = require("../../../middlewares/validations");
 //       result = await subMenuModel.find({ menu_id: submenuId });
 //     }
 //     return res.status(200)
-          // .json({
-          //   statusCode: 200,
+// .json({
+//   statusCode: 200,
 //       message: "Sub menus fetched successfully",
 //       data: result,
 //     });
 //   } catch (err) {
 //     return res.status(500)
-          // .json({
-          //   statusCode: 500, message: err.message });
+// .json({
+//   statusCode: 500, message: err.message });
 //   }
 // };
 // const listSubMenu = async (req, res, next) => {
@@ -47,7 +47,7 @@ const validator = require("../../../middlewares/validations");
 //     }
 //   }else{
 //     let isMenuIdValid = await menuModel.findOne({_id:menu_id});
-    
+
 //          if(!isMenuIdValid){return res.status(404).json({ error: "Invalid menu id." });}
 //        let items = await subMenuModel.find({ menu_id: menu_id });
 //           menuData = {
@@ -61,31 +61,28 @@ const validator = require("../../../middlewares/validations");
 //         };
 //   }
 //     return res.status(200)
-          // .json({
-          //   statusCode: 200,
+// .json({
+//   statusCode: 200,
 //       message: "Sub menus fetched successfully",
 //       data: menuData,
 //     });
 //   } catch (err) {
 //     return res.status(500)
-          // .json({
-          //   statusCode: 500, message: err.message });
+// .json({
+//   statusCode: 500, message: err.message });
 //   }
 // };
 
-
-
 const listSubMenu = async (req, res) => {
   try {
-  
     let menu_id = req.query.menu_id;
     let menuData = [];
     if (!menu_id) {
-      const menus = await menuModel.find({}, '_id title time');
+      const menus = await menuModel.find({}, "_id title time");
       const menuPromises = menus.map(async (menu) => {
         const items = await subMenuModel.find(
           { menu_id: menu._id },
-          'quantity item_name price  createdAt updatedAt'
+          "quantity item_name price  createdAt updatedAt"
           //COUNT
         );
         return {
@@ -105,7 +102,7 @@ const listSubMenu = async (req, res) => {
 
       const items = await subMenuModel.find(
         { menu_id: menu_id },
-        'quantity item_name price  createdAt updatedAt'
+        "quantity item_name price  createdAt updatedAt"
         //COUNT
       );
       menuData = {
@@ -114,23 +111,21 @@ const listSubMenu = async (req, res) => {
         time: isMenuIdValid.time,
         items,
         // count:isMenuIdValid.count
-  
       };
     }
 
-    return res.status(200)
-          .json({
-            statusCode: 200,
+    return res.status(200).json({
+      statusCode: 200,
       message: "Sub menus fetched successfully",
       data: menuData,
     });
   } catch (err) {
-    return res.status(500)
-          .json({
-            statusCode: 500, message: err.message });
+    return res.status(500).json({
+      statusCode: 500,
+      message: err.message,
+    });
   }
 };
-
 
 // const listSubMenu = async (req, res) => {
 //   try {
@@ -205,74 +200,91 @@ const listSubMenu = async (req, res) => {
 //   }
 // };
 
-
-
-
 //=============================ADD NEW Sub MENUS=====================================================================
 const addSubMenu = async (req, res, next) => {
-  let {item_name, menu_id, price} = req.body;
+  let { item_name, menu_id, price } = req.body;
   try {
     const requiredFields = { item_name, menu_id, price };
     const error = validator.isRequired(requiredFields);
-    
-    if (error.length) return res.status(400).json({ statusCode: 400, message:error });
-              
+
+    if (error.length)
+      return res.status(400).json({ statusCode: 400, message: error });
+
     const isTitleAlreadyExist = await subMenuModel.findOne({
-      item_name: { $regex: new RegExp(`\\b${item_name}\\b`, 'i') },
+      item_name: { $regex: new RegExp(`\\b${item_name}\\b`, "i") },
       menu_id,
     });
-    
-    if (isTitleAlreadyExist) return res.status(400).json({ statusCode: 400, message: "Title already exists" });
-    
+
+    if (isTitleAlreadyExist)
+      return res
+        .status(400)
+        .json({ statusCode: 400, message: "Title already exists" });
+
     const isMenuExists = await menuModel.findOne({ _id: menu_id });
-    
-    if (!isMenuExists) return res.status(400).json({ statusCode: 400, message: "Invalid menu id." });
-    
+
+    if (!isMenuExists)
+      return res
+        .status(400)
+        .json({ statusCode: 400, message: "Invalid menu id." });
+
     const newSubMenu = new subMenuModel({ item_name, menu_id, price });
     const result = await newSubMenu.save();
-    
-    return res.status(200).json({ message: "Sub menu added successfully", data: result });
-    
+
+    return res
+      .status(200)
+      .json({ message: "Sub menu added successfully", data: result });
   } catch (err) {
-    return res.status(500)
-          .json({
-            statusCode: 500, message: err.message });
+    return res.status(500).json({
+      statusCode: 500,
+      message: err.message,
+    });
   }
 };
 //=============================UPDATE SUB MENUS======================================================================
 
 const updateSubMenu = async (req, res, next) => {
-  let {_id, item_name, menu_id, price} = req.body;
+  let { _id, item_name, menu_id, price } = req.body;
   try {
-      const requiredFields = { _id, item_name, menu_id, price };
-      const error = validator.isRequired(requiredFields);
+    const requiredFields = { _id, item_name, menu_id, price };
+    const error = validator.isRequired(requiredFields);
 
-      if (error.length) return res.status(400).json({ statusCode: 400, message:error });
+    if (error.length)
+      return res.status(400).json({ statusCode: 400, message: error });
 
-      const isIdExist = await subMenuModel.findOne({ _id });
+    const isIdExist = await subMenuModel.findOne({ _id });
 
-      if (isIdExist) {
-        const isTitleAlreadyExist = await subMenuModel.findOne({
-          item_name: { $regex: new RegExp(`\\b${item_name}\\b`, 'i') },
-          _id: { $ne: _id },
+    if (isIdExist) {
+      const isTitleAlreadyExist = await subMenuModel.findOne({
+        item_name: { $regex: new RegExp(`\\b${item_name}\\b`, "i") },
+        _id: { $ne: _id },
+        menu_id,
+      });
+
+      if (!isTitleAlreadyExist) {
+        await subMenuModel.findByIdAndUpdate(_id, {
+          item_name,
           menu_id,
+          price,
         });
 
-        if (!isTitleAlreadyExist) {
-          await subMenuModel.findByIdAndUpdate(_id, {item_name,menu_id,price});
-
-          return res.status(200).json({ message: "Sub Menu updated successfully" });
-        } else {
-          return res.status(400).json({ message: "This title is already exists." });
-        }
+        return res
+          .status(200)
+          .json({ message: "Sub Menu updated successfully" });
       } else {
-        return res.status(400).json({ statusCode: 400, message: "Invalid sub menu id" });
+        return res
+          .status(400)
+          .json({ message: "This title is already exists." });
       }
-
+    } else {
+      return res
+        .status(400)
+        .json({ statusCode: 400, message: "Invalid sub menu id" });
+    }
   } catch (err) {
-   return res.status(500)
-          .json({
-            statusCode: 500, message: err.message });
+    return res.status(500).json({
+      statusCode: 500,
+      message: err.message,
+    });
   }
 };
 //==============================DELETE Sub MENUS=====================================================================
@@ -280,13 +292,23 @@ const deleteSubMenu = async (req, res, next) => {
   let subMenuId = req.query.id;
 
   try {
-    if(!subMenuId){ return res.status(400).json({statusCode: 400, error: "Sub Menu id is required." });}
+    if (!subMenuId) {
+      return res
+        .status(400)
+        .json({ statusCode: 400, error: "Sub Menu id is required." });
+    }
     let isMenuIdExist = await subMenuModel.findOne({ _id: subMenuId });
-    if (!isMenuIdExist) {return res.status(400).json({ statusCode: 400,message: "Invalid sub menu id" }); }
-      await subMenuModel.findByIdAndRemove(subMenuId);
-      return res.status(200).json({statusCode: 200, message: "Sub menu deleted successfully" });
+    if (!isMenuIdExist) {
+      return res
+        .status(400)
+        .json({ statusCode: 400, message: "Invalid sub menu id" });
+    }
+    await subMenuModel.findByIdAndRemove(subMenuId);
+    return res
+      .status(200)
+      .json({ statusCode: 200, message: "Sub menu deleted successfully" });
   } catch (err) {
-    res.status(500).json({statusCode: 500, message: err.message });
+    res.status(500).json({ statusCode: 500, message: err.message });
   }
 };
 //=======================EXPORT FUNCTIONS==========================================================================
