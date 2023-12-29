@@ -947,12 +947,12 @@ const pendingOrderList = async (req, res) => {
 
 const listOrder = async (req, res) => {
   try {
-    // const search = req.query.search;
+    const search = req.query.search;
 
-    console.log(req.emp, "jjjjjjjjjjjjjjjjjjjjj");
-    let empDetails = await EmpModel.findOne({ EmployeeId: req.emp.emp_id });
+    // console.log(req.emp, "jjjjjjjjjjjjjjjjjjjjj");
+    // let empDetails = await EmpModel.findOne({ EmployeeId: req.emp.emp_id });
 
-    const search = empDetails.role == "admin" ? req.query.search || req.emp.emp_id: req.emp.emp_id;
+    // const search = empDetails.role == "admin" ? req.query.search || req.emp.emp_id: req.emp.emp_id;
     
 
     const currentPage = parseInt(req.query.currentPage, 10) || 0;
