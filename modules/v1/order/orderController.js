@@ -6,6 +6,8 @@ const validator = require("../../../helper/validations");
 const { EmpModel } = require("../../../models/empDetailsModel");
 const { orderModel } = require("../../../models/ordersModel");
 const { subMenuModel } = require("../../../models/subMenuModel");
+const { Notification } = require("../../../models/notificationModel");
+
 
 
 const Excel = require("exceljs");
@@ -13,8 +15,7 @@ const Excel = require("exceljs");
 const addOrder = async (req, res) => {
   try {
     let orderDetails = req.body;
-    console.log(req.emp,"tokennnnnnnnnnnnnnnnnnn");
-    console.log(req.emp.emp_id,"idddddddddddddddddddddddd");
+
 
 
     console.log("add-order", orderDetails);
@@ -422,7 +423,7 @@ const pendingOrderList = async (req, res) => {
     }
     let today = new Date();
     today = today.toLocaleDateString().replaceAll("/", "-");
-    console.log(today, "1111111111111");
+
 
     const totalRecords = await orderModel
       .find({

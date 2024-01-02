@@ -20,7 +20,7 @@ const decodeToken = (token) => {
 
     // Verify JWT
     const decoded = jwt.verify(decryptedToken, process.env.TOKEN_KEY);
-    console.log(decoded,"khushiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii");
+
 
     return decoded;
   } catch (err) {

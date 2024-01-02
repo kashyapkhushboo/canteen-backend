@@ -245,8 +245,7 @@ const verifyOTP = async (req, res) => {
 
       const token = createAuthToken(); // Call the function to get the token
 
-      console.log(token, "tokennnnnnnnnnn");
-
+  
       // const token = jwt.sign(
       //   { user_id: empDetails._id, emp_id },
       //   process.env.TOKEN_KEY,

@@ -1,5 +1,5 @@
 require("dotenv").config();
-const rateLimit = require("express-rate-limit");
+// const rateLimit = require("express-rate-limit");
 const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser");
@@ -25,7 +25,7 @@ global.socketIds = [];
 io.use((socket, next) => {
   // Access the token from the query parameters
   const token = socket.handshake.query.token;
-  console.log(token, "tokennnnnnnnnnnn");
+
 
   try {
     // Decode and verify the token
@@ -51,11 +51,11 @@ io.on("connection", (socket) => {
   global.socketIds.push({ userId: empId, socketId: socket.id });
 });
 
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: "Too many requests from this IP, please try again later.",
-});
+// const limiter = rateLimit({
+//   windowMs: 15 * 60 * 1000, // 15 minutes
+//   max: 100, // limit each IP to 100 requests per windowMs
+//   message: "Too many requests from this IP, please try again later.",
+// });
 
 const adminRouter = require("./routes/adminRoutes");
 const userRoutes = require("./routes/userRoutes");
@@ -64,7 +64,7 @@ const userRoutes = require("./routes/userRoutes");
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "jade");
 app.use(cors());
-app.use(limiter);
+// app.use(limiter);
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
