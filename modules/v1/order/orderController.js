@@ -16,14 +16,11 @@ const addOrder = async (req, res) => {
   try {
     let orderDetails = req.body;
 
-
-
-    console.log("add-order", orderDetails);
     let orderData = {
       emp_id: req.emp.emp_id,
       order_rec: orderDetails.order_rec,
     };
-console.log(orderData,"222222222222222222222")
+
     const requiredFeilds = {
       order_rec: orderDetails.order_rec,
     };
@@ -37,22 +34,19 @@ console.log(orderData,"222222222222222222222")
       let totalBalance = 0;
 
       for (let i = 0; i < orderData.order_rec.length; i++) {
-        console.log(orderData.order_rec[i], "looooop");
-        console.log(orderData.order_rec[i].itemId, "oooooooooooo");
 
         if (orderData.order_rec[i].itemId) {
           // If itemId is present, validate using itemId
           isSubMenuValid = await subMenuModel.findOne({
             _id: orderData.order_rec[i].itemId,
           });
-          console.log(isSubMenuValid, "iddddddddddddddd");
+
         } else {
           // If itemId is not present, validate using menuId and item_name
           isSubMenuValid = await subMenuModel.findOne({
             menu_id: orderData.order_rec[i].menu_id,
             item_name: orderData.order_rec[i].item_name,
           });
-          console.log(isSubMenuValid, "menuuuuuuuuuuuuuuuuuuu");
         }
 
         if (!isSubMenuValid) {
@@ -68,14 +62,11 @@ console.log(orderData,"222222222222222222222")
         orderData.order_rec[i]["price"] = isSubMenuValid.price;
         orderData.order_rec[i]["totalPrice"] = perItemBalance;
         orderData.order_rec[i]["item_name"] = isSubMenuValid.item_name;
-        console.log(perItemBalance, "perrrrrrrrrr");
         totalBalance = totalBalance + perItemBalance;
-        console.log(totalBalance, "totalllllllllllllllll");
       }
       orderData.totalBalance = totalBalance;
 
       let empDetails = await EmpModel.findOne({ EmployeeId: req.emp.emp_id });
-      console.log(empDetails,"detailssssssssssssssssssssssss");
 
       if (empDetails.role === "admin") {
         if (!req.body.emp_id) {
@@ -120,14 +111,10 @@ console.log(orderData,"222222222222222222222")
         }
 
         const io = req.io;
-        console.log("Global socketIds:", global.socketIds);
 
         const targetSockets = global.socketIds.filter(
           (entry) => entry.userId == userDetails.EmployeeId
         );
-
-        console.log("EmployeeId:", userDetails.EmployeeId);
-        console.log("Target Sockets:", targetSockets);
 
         const message = ` An order has been placed for ${userDetails.FirstName} by the admin.`;
 
@@ -180,19 +167,13 @@ console.log(orderData,"222222222222222222222")
         const newOrder = new orderModel(orderData);
         const io = req.io;
 
-        console.log("Global socketIds:", global.socketIds);
-
         const adminEmployeeIds = await EmpModel.find({
           role: "admin",
         }).distinct("EmployeeId");
-        console.log(adminEmployeeIds, "adminnnnnnnnnnnnnnnnnnn");
 
         const targetSockets = global.socketIds.filter((entry) =>
           adminEmployeeIds.includes(Number(entry.userId))
         );
-
-        console.log("EmployeeId:", adminEmployeeIds);
-        console.log("Target Sockets:", targetSockets);
 
         if (targetSockets.length > 0) {
           const message = `A new order has been placed by the ${empDetails.FirstName}. Please review the order. `;
@@ -468,12 +449,12 @@ const pendingOrderList = async (req, res) => {
 
 const listOrder = async (req, res) => {
   try {
-    const search = req.query.search;
+    // const search = req.query.search;
 
-    // console.log(req.emp, "jjjjjjjjjjjjjjjjjjjjj");
-    // let empDetails = await EmpModel.findOne({ EmployeeId: req.emp.emp_id });
+    console.log(req.emp, "jjjjjjjjjjjjjjjjjjjjj");
+    let empDetails = await EmpModel.findOne({ EmployeeId: req.emp.emp_id });
 
-    // const search = empDetails.role == "admin" ? req.query.search || req.emp.emp_id: req.emp.emp_id;
+    const search = empDetails.role == "admin" ? req.query.search || req.emp.emp_id: req.emp.emp_id;
 
     const currentPage = parseInt(req.query.currentPage, 10) || 0;
     const limit = parseInt(req.query.limit, 10) || 10;

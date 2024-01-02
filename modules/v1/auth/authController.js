@@ -124,14 +124,13 @@ const listUsers = async (req, res, next) => {
 };
 const viewUser = async (req, res) => {
   try {
-    console.log(req.emp, "jjjjjjjjjjjjjjjjjjjjj");
     let empDetails = await EmpModel.findOne({ EmployeeId: req.emp.emp_id });
 
     const emp_id =
       empDetails.role == "admin"
         ? req.query.emp_id || req.emp.emp_id
         : req.emp.emp_id;
-    console.log(emp_id, "khushiiiiiiiiiiii");
+
     if (!emp_id) {
       return res.status(403).json({
         statusCode: 403,
@@ -139,7 +138,7 @@ const viewUser = async (req, res) => {
       });
     }
     const userDetail = await EmpModel.findOne({ EmployeeId: emp_id });
-    console.log(userDetail, "ooooooooooooooooo");
+
     if (userDetail) {
       return res.status(200).json({
         statusCode: 200,

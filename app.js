@@ -26,11 +26,9 @@ io.use((socket, next) => {
   // Access the token from the query parameters
   const token = socket.handshake.query.token;
 
-
   try {
     // Decode and verify the token
     const decodedUser = decodeToken(token);
-    console.log(token, "222222222222");
 
     // Attach the decoded user information to the socket
     socket.decodedUser = decodedUser;
@@ -48,7 +46,26 @@ io.on("connection", (socket) => {
   const empId = socket.decodedUser.emp_id;
   console.log(`Socket Initialized.`, socket.id, "with userId", empId);
 
-  global.socketIds.push({ userId: empId, socketId: socket.id });
+  let index = global.socketIds.findIndex((user) => user.userId);
+
+  if (index == -1)
+    global.socketIds.push({ userId: empId, socketId: socket.id });
+  else global.socketIds[index].socketId = socket.id;
+
+  console.log("global sockets: ", global.socketIds);
+
+  socket.on("disconnect", () => {
+    var clientid = socket.id;
+    for (var i = 0; i < global.socketIds.length; i++)
+      if (
+        global.socketIds[i].socketId &&
+        global.socketIds[i].socketId == clientid
+      ) {
+        global.socketIds.splice(i, 1);
+        break;
+      }
+    console.log("After updating: ", global.socketIds);
+  });
 });
 
 // const limiter = rateLimit({
