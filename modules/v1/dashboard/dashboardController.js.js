@@ -1,6 +1,6 @@
-const { EmpModel } = require("../../models/empDetailsModel");
-const { orderModel } = require("../../models/ordersModel");
-const { subMenuModel } = require("../../models/subMenuModel");
+const { EmpModel } = require("../../../models/empDetailsModel");
+const { orderModel } = require("../../../models/ordersModel");
+const { subMenuModel } = require("../../../models/subMenuModel");
 
 const count = async (req, res, next) => {
   try {

@@ -3,6 +3,6 @@ const { walletHistory, updateBalance } = require("./walletController");
 const walletRoutes = require("express").Router();
 
 walletRoutes.get("/wallet-history", walletHistory);
-walletRoutes.post("/update-balace", updateBalance);
+walletRoutes.post("/update-balance", updateBalance);
 
 module.exports = walletRoutes;

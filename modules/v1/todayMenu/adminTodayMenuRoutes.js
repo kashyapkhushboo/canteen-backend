@@ -3,7 +3,7 @@ const { addTodayMenu, deleteTodayMenu } = require("./todayMenuController");
 
 const adminTodayMenuRoutes = require("express").Router();
 
-adminTodayMenuRoutes.post("/add-todayMenu", verifyToken, addTodayMenu);
-adminTodayMenuRoutes.delete("/delete-todayMenu", verifyToken, deleteTodayMenu);
+adminTodayMenuRoutes.post("/add-today-menu", addTodayMenu);
+adminTodayMenuRoutes.delete("/delete-today-menu", deleteTodayMenu);
 
 module.exports = adminTodayMenuRoutes;

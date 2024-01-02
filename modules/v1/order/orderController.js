@@ -6,20 +6,23 @@ const validator = require("../../../helper/validations");
 const { EmpModel } = require("../../../models/empDetailsModel");
 const { orderModel } = require("../../../models/ordersModel");
 const { subMenuModel } = require("../../../models/subMenuModel");
-const moment = require("moment");
+
 
 const Excel = require("exceljs");
 
 const addOrder = async (req, res) => {
   try {
     let orderDetails = req.body;
+    console.log(req.emp,"tokennnnnnnnnnnnnnnnnnn");
+    console.log(req.emp.emp_id,"idddddddddddddddddddddddd");
+
 
     console.log("add-order", orderDetails);
     let orderData = {
       emp_id: req.emp.emp_id,
       order_rec: orderDetails.order_rec,
     };
-
+console.log(orderData,"222222222222222222222")
     const requiredFeilds = {
       order_rec: orderDetails.order_rec,
     };
@@ -71,6 +74,7 @@ const addOrder = async (req, res) => {
       orderData.totalBalance = totalBalance;
 
       let empDetails = await EmpModel.findOne({ EmployeeId: req.emp.emp_id });
+      console.log(empDetails,"detailssssssssssssssssssssssss");
 
       if (empDetails.role === "admin") {
         if (!req.body.emp_id) {

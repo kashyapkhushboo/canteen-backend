@@ -296,53 +296,53 @@ const verifyOTP = async (req, res) => {
     });
   }
 };
-const deleteUser = async (req, res, next) => {
-  let emp_id = req.query.emp_id;
-  try {
-    let isEmpExists = await EmpModel.findOne({ EmployeeId: emp_id });
-    console.log(isEmpExists, "kkkkkkkkkkkkkkkkkkkkkkkkkkk");
-    if (isEmpExists) {
-      await EmpModel.findByIdAndRemove(isEmpExists._id);
-      return res
-        .status(200)
-        .json({ statusCode: 200, message: "Employee deleted successfully" });
-    } else {
-      return res.status(500).json({
-        statusCode: 500,
-        message: "Invalid employee id",
-      });
-    }
-  } catch (err) {
-    return res.status(500).json({
-      statusCode: 500,
-      message: err.message,
-    });
-  }
-};
-const updateUser = async (req, res) => {
-  const _id = req.query.id;
-  const data = req.body;
-  console.log(data);
 
-  try {
-    const isIdValid = await EmpModel.findOne({ _id });
-    if (!isIdValid) {
-      return res.status(403).json({ message: "Invalid Id" });
-    } else {
-      const user = await EmpModel.findByIdAndUpdate(_id, data);
-      return res.status(200).json({ message: "User updated successfully" });
-    }
-  } catch (error) {
-    return res.status(400).json({ message: error.message });
-  }
-};
+// const deleteUser = async (req, res, next) => {
+//   let emp_id = req.query.emp_id;
+//   try {
+//     let isEmpExists = await EmpModel.findOne({ EmployeeId: emp_id });
+//     console.log(isEmpExists, "kkkkkkkkkkkkkkkkkkkkkkkkkkk");
+//     if (isEmpExists) {
+//       await EmpModel.findByIdAndRemove(isEmpExists._id);
+//       return res
+//         .status(200)
+//         .json({ statusCode: 200, message: "Employee deleted successfully" });
+//     } else {
+//       return res.status(500).json({
+//         statusCode: 500,
+//         message: "Invalid employee id",
+//       });
+//     }
+//   } catch (err) {
+//     return res.status(500).json({
+//       statusCode: 500,
+//       message: err.message,
+//     });
+//   }
+// };
+
+// const updateUser = async (req, res) => {
+//   const _id = req.query.id;
+//   const data = req.body;
+//   console.log(data);
+
+//   try {
+//     const isIdValid = await EmpModel.findOne({ _id });
+//     if (!isIdValid) {
+//       return res.status(403).json({ message: "Invalid Id" });
+//     } else {
+//       const user = await EmpModel.findByIdAndUpdate(_id, data);
+//       return res.status(200).json({ message: "User updated successfully" });
+//     }
+//   } catch (error) {
+//     return res.status(400).json({ message: error.message });
+//   }
+// };
 
 module.exports = {
   login,
   listUsers,
   viewUser,
   createUser,
-  verifyOTP,
-  deleteUser,
-  updateUser,
+  verifyOTP
 };

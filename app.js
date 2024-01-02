@@ -74,8 +74,8 @@ app.use(function (req, res, next) {
   req.io = io;
   next();
 });
-app.use("/", userRoutes);
-app.use("/admin", adminRouter);
+app.use("/user/modules/v1", userRoutes);
+app.use("/admin/modules/v1", adminRouter);
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));

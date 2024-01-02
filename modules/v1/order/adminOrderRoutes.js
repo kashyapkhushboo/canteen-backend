@@ -8,6 +8,6 @@ const adminOrderRoutes = require("express").Router();
 
 adminOrderRoutes.get("/pending-order", pendingOrderList);
 adminOrderRoutes.get("/list-order", listOrder);
-adminOrderRoutes.put("/update-status", updateStatus);
+adminOrderRoutes.post("/update-status", updateStatus);
 
 module.exports = adminOrderRoutes;
