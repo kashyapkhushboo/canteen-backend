@@ -7,9 +7,7 @@ const { EmpModel } = require("../../../models/empDetailsModel");
 const { orderModel } = require("../../../models/ordersModel");
 const { subMenuModel } = require("../../../models/subMenuModel");
 const { Notification } = require("../../../models/notificationModel");
-
-
-
+const moment = require("moment");
 const Excel = require("exceljs");
 
 const addOrder = async (req, res) => {
@@ -34,13 +32,11 @@ const addOrder = async (req, res) => {
       let totalBalance = 0;
 
       for (let i = 0; i < orderData.order_rec.length; i++) {
-
         if (orderData.order_rec[i].itemId) {
           // If itemId is present, validate using itemId
           isSubMenuValid = await subMenuModel.findOne({
             _id: orderData.order_rec[i].itemId,
           });
-
         } else {
           // If itemId is not present, validate using menuId and item_name
           isSubMenuValid = await subMenuModel.findOne({
@@ -50,11 +46,9 @@ const addOrder = async (req, res) => {
         }
 
         if (!isSubMenuValid) {
-          return res
-            .status(400)
-            .json({
-              error: `Item '${orderData.order_rec[i].item_name}' you have added in the order is invalid.`,
-            });
+          return res.status(400).json({
+            error: `Item '${orderData.order_rec[i].item_name}' you have added in the order is invalid.`,
+          });
         }
 
         let perItemBalance =
@@ -90,6 +84,9 @@ const addOrder = async (req, res) => {
         orderData.emp_id = req.body.emp_id;
         orderData.order_status = "confirm";
         orderData.bill_status = "unpaid";
+
+        const today = new Date();
+        orderData.date = moment(today).format("MM-DD-YYYY").toString();
 
         const newOrder = new orderModel(orderData);
         let result = await newOrder.save();
@@ -164,6 +161,9 @@ const addOrder = async (req, res) => {
         orderData.order_status = "pending";
         orderData.bill_status = "unpaid";
 
+        const today = new Date();
+        orderData.date = moment(today).format("MM-DD-YYYY").toString();
+
         const newOrder = new orderModel(orderData);
         const io = req.io;
 
@@ -176,7 +176,7 @@ const addOrder = async (req, res) => {
         );
 
         if (targetSockets.length > 0) {
-          const message = `A new order has been placed by the ${empDetails.FirstName}. Please review the order. `;
+          const message = `A new order has been placed by  ${empDetails.FirstName}. Please review the order. `;
 
           targetSockets.forEach((targetSocket) => {
             io.to(targetSocket.socketId).emit("notification", message);
@@ -280,10 +280,7 @@ const updateStatus = async (req, res) => {
           (entry) => entry.userId == empDetails.EmployeeId
         );
 
-        console.log("EmployeeId:", empDetails.EmployeeId);
-        console.log("Target Sockets:", targetSockets);
-
-        const message = `${empDetails.FirstName} your order has been confirm`;
+        const message = `${empDetails.FirstName} your order has been confirmed`;
 
         if (targetSockets.length > 0) {
           targetSockets.forEach((targetSocket) => {
@@ -332,8 +329,6 @@ const updateStatus = async (req, res) => {
           (entry) => entry.userId == empDetails.EmployeeId
         );
 
-        console.log("EmployeeId:", empDetails.EmployeeId);
-        console.log("Target Sockets:", targetSockets);
         const message = `${empDetails.FirstName} your order has been cancelled.`;
 
         if (targetSockets.length > 0) {
@@ -402,9 +397,8 @@ const pendingOrderList = async (req, res) => {
         error: "Invalid order status.",
       });
     }
-    let today = new Date();
-    today = today.toLocaleDateString().replaceAll("/", "-");
-
+    const newDate = new Date();
+    today = moment(newDate).format("MM-DD-YYYY").toString();
 
     const totalRecords = await orderModel
       .find({
@@ -429,7 +423,7 @@ const pendingOrderList = async (req, res) => {
       date: { $lt: today }, // Match dates smaller than "28-10-023"
       order_status: "pending", // Match status equal to "pending"
     });
-    console;
+
     return res.status(200).json({
       statusCode: 200,
       message: "Pending order list fetched successfully",
@@ -449,12 +443,9 @@ const pendingOrderList = async (req, res) => {
 
 const listOrder = async (req, res) => {
   try {
-    // const search = req.query.search;
-
-    console.log(req.emp, "jjjjjjjjjjjjjjjjjjjjj");
     let empDetails = await EmpModel.findOne({ EmployeeId: req.emp.emp_id });
 
-    const search = empDetails.role == "admin" ? req.query.search || req.emp.emp_id: req.emp.emp_id;
+    let search = empDetails.role == "user" ? req.emp.emp_id : req.query.search;
 
     const currentPage = parseInt(req.query.currentPage, 10) || 0;
     const limit = parseInt(req.query.limit, 10) || 10;
@@ -467,8 +458,6 @@ const listOrder = async (req, res) => {
       query = {
         $or: [{ emp_id: Number(search) }, { totalBalance: Number(search) }],
       };
-    } else if (search.toLowerCase() === "paid") {
-      query = { bill_status: "paid" };
     } else {
       query = {
         $or: [
@@ -481,18 +470,21 @@ const listOrder = async (req, res) => {
       };
     }
 
+    console.log("Date interval: ", req.query.dateInterval);
+
     // Date interval filtering
     if (req.query.dateInterval) {
-      const [startDateStr, endDateStr] = req.query.dateInterval.split(" to ");
-      const startDate = moment(startDateStr, "MM-DD-YYYY")
-        .startOf("day")
-        .toDate();
-      const endDate = moment(endDateStr, "MM-DD-YYYY").endOf("day").toDate();
+      const [startDateStr, endDateStr] = req.query.dateInterval.split("to");
+      const startDate = moment(startDateStr, "MM-DD-YYYY").startOf("day");
+      const endDate = moment(endDateStr, "MM-DD-YYYY").endOf("day");
       query.date = {
         $gte: moment(startDate).format("MM-DD-YYYY"),
-        $lte: moment(endDate).format("MM-DD-YYYY"),
+        // $lte: moment(endDate).format("MM-DD-YYYY"),
       };
     }
+
+    console.log("Query: ", query);
+
     const totalRecords = await orderModel.countDocuments(query);
 
     // Use totalRecords as the limit when downloading in Excel format
@@ -504,11 +496,10 @@ const listOrder = async (req, res) => {
           (req.query.download === "excel" ? totalRecords : limit)
       )
       .limit(req.query.download === "excel" ? totalRecords : limit);
-    console.log(items, "itemsssssssssssssssssssssssss");
 
     if (items.length === 0) {
-      return res.status(200).json({
-        statusCode: 200,
+      return res.status(400).json({
+        statusCode: 400,
         success: false,
         message: "No items found matching the search criteria.",
         data: [],
@@ -609,9 +600,45 @@ const listOrder = async (req, res) => {
   }
 };
 
+const usersOrder = async (req, res) => {
+  // const emp_id = req.emp.emp_id;
+  let empDetails = await EmpModel.findOne({ EmployeeId: req.emp.emp_id });
+
+  const emp_id =
+    empDetails.role == "admin"
+      ? req.query.search || req.emp.emp_id
+      : req.emp.emp_id;
+  try {
+    let error = validator.isRequired({ emp_id: emp_id });
+    if (error.length != 0) {
+      return res.status(400).json({
+        statusCode: 400,
+        error: error,
+      });
+    } else {
+      const allOrders = await orderModel.findOne({ emp_id: emp_id });
+      if (!allOrders && allOrders.length === 0) {
+        return res.status(400).json({
+          statusCode: 400,
+          success: true,
+          message: `no order of ${allOrders.fullName}`,
+        });
+      }
+
+      return res.status(200).json({
+        statusCode: 200,
+        data: allOrders,
+      });
+    }
+  } catch (error) {
+    return res.status(404).json({ message: error.message });
+  }
+};
+
 module.exports = {
   addOrder,
   listOrder,
   updateStatus,
   pendingOrderList,
+  usersOrder,
 };

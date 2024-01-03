@@ -13,35 +13,8 @@ const listMenu = async (req, res, next) => {
     res.status(500).json({ message: err.message });
   }
 };
-//=============================ADD NEW MENUS=====================================================================
-// const addMenu = async (req, res, next) => {
-//   let data = req.body;
-//   try {
-//     let requiredFeilds = {
-//       title: data.title,
-//       time:data.time
-//     };
-//     let error = validator.isRequired(requiredFeilds);
-//     if (error.length != 0) {
-//       return res.status(400).json({ error: error });
-//     } else {
-//       let isTitleAlreadyExist = await menuModel.findOne({
-//         title:{ $regex: new RegExp(`\\b${req.body.item_name}\\b`, 'i') },
-//       });
-//       if (!isTitleAlreadyExist) {
-//         let newMenu = new menuModel(data);
-//         let result = await newMenu.save();
-//        return res
-//           .status(200)
-//           .json({ message: "Menu added successfully", data: result });
-//       } else {
-//         return res.status(400).json({ error: "Title already exists." });
-//       }
-//     }
-//   } catch (err) {
-//     return res.status(400).json({ message: err.message });
-//   }
-// };
+
+//=============================ADD NEW MENUS====================================================================
 
 const addMenu = async (req, res, next) => {
   let data = req.body;

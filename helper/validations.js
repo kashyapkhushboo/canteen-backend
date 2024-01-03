@@ -110,18 +110,3 @@ module.exports = {
   isNumeric,
 };
 
-// const validateRegister = (req, res, next)=>{
-
-//   const {userName, emailAddress, password} = req.body;
-//   const errors =[];
-
-//   if(!userName||!emailAddress||!password) {
-//     errors.push("Please fill all the required fields.")
-//   }
-
-//   if(errors.length>=1){
-//     return res.status(400).json({error:errors})
-//   }
-//   next();
-// }
-// module.exports = {validateRegister}

@@ -15,7 +15,6 @@ const transporter = nodemailer.createTransport(
 );
 
 const sendEmail = async (email) => {
-  console.log(sendEmail,"emaillllllllllll");
   try {
     const generatedOTP = generateOTP();
     const mailOptions = {

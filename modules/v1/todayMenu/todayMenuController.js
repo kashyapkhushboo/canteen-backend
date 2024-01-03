@@ -4,7 +4,7 @@ const validator = require("../../../helper/validations");
 const { menuModel } = require("../../../models/menuModel");
 const { subMenuModel } = require("../../../models/subMenuModel");
 const { EmpModel } = require("../../../models/empDetailsModel");
-// const {Notification} = require("../../../models/notificationModel")
+const {Notification} = require("../../../models/notificationModel")
 
 // const updateTodayMenu = async (req, res, next) => {
 //   let { sub_menu_items, menuType } = req.body;
@@ -152,7 +152,7 @@ const addTodayMenu = async (req, res, next) => {
       console.log("Target Sockets:", targetSockets);
 
       if (targetSockets.length > 0) {
-        const message = `'notification', 'Please Check Menu added for today' `;
+        const message =  `Menu for ${typeExists.title} is added successfully for today.` ;
 
         targetSockets.forEach((targetSocket) => {
           io.to(targetSocket.socketId).emit("notification", message);

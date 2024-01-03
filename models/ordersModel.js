@@ -52,12 +52,7 @@ const orderSchema = new mongoose.Schema(
     },
     date: {
       required: true,
-      type: String,
-      default: () => {
-        const today = new Date();
-        const formattedDate = today.toLocaleDateString().replaceAll("/", "-");
-        return formattedDate;
-      },
+      type: Date,
     },
     time: {
       required: true,

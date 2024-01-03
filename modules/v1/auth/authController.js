@@ -2,7 +2,6 @@ const { EmpModel } = require("../../../models/empDetailsModel");
 const validator = require("../../../helper/validations");
 let jwt = require("jsonwebtoken");
 require("dotenv").config();
-
 const { otpModel } = require("../../../models/otpModel");
 const crypto = require("crypto-js");
 const { sendEmail } = require("../../../views/emailTemplate/sendOtp");
@@ -22,7 +21,7 @@ const login = async (req, res) => {
       if (!empExists) {
         return res.status(403).json({
           statusCode: 403,
-          error: "Invalid employee id.",
+          message: "Invalid employee id.",
         });
       }
       let otpDetails = await sendEmail(empExists.email);
@@ -207,7 +206,7 @@ const createUser = async (req, res) => {
 };
 const verifyOTP = async (req, res) => {
   try {
-    //  let emp_id = req.emp.emp_id;
+
     const { otp, emp_id } = req.body;
     let requiredFeilds = {
       emp_id: emp_id,
@@ -236,26 +235,17 @@ const verifyOTP = async (req, res) => {
             expiresIn: "2400h",
           }
         );
-        console.log(token, "ennnnnnnnnnnnnnnnnnnnnn");
         return encodeURIComponent(
           crypto.AES.encrypt(token, process.env.TOKEN_KEY).toString()
         );
       };
 
-      const token = createAuthToken(); // Call the function to get the token
+      const token = createAuthToken(); 
 
-  
-      // const token = jwt.sign(
-      //   { user_id: empDetails._id, emp_id },
-      //   process.env.TOKEN_KEY,
-      //   {
-      //     expiresIn: "2400h",
-      //   }
-      // );
       if (result.count >= 3) {
         await otpModel.deleteMany({ email_id: empDetails.email });
         return res.status(400).json({
-          error: `You have enter wrong otp ${result.count} times, Please try to login again.`,
+          message: `You have entered wrong otp ${result.count} times, Please try to login again.`,
         });
       }
       let isOtpMatched = await otpModel.findOne({
