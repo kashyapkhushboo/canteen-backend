@@ -94,6 +94,8 @@ const listUsers = async (req, res, next) => {
     const list = await EmpModel.find(query)
       .skip((currentPage - 0) * limit)
       .limit(limit);
+    list = JSON.parse(JSON.stringify(list));
+    
 
     if (list.length == 0) {
       return res.status(200).json({
@@ -206,7 +208,6 @@ const createUser = async (req, res) => {
 };
 const verifyOTP = async (req, res) => {
   try {
-
     const { otp, emp_id } = req.body;
     let requiredFeilds = {
       emp_id: emp_id,
@@ -240,7 +241,7 @@ const verifyOTP = async (req, res) => {
         );
       };
 
-      const token = createAuthToken(); 
+      const token = createAuthToken();
 
       if (result.count >= 3) {
         await otpModel.deleteMany({ email_id: empDetails.email });
@@ -332,5 +333,5 @@ module.exports = {
   listUsers,
   viewUser,
   createUser,
-  verifyOTP
+  verifyOTP,
 };

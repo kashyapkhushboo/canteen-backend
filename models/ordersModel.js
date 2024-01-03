@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const moment = require("moment");
+
 const orderItemSchema = new mongoose.Schema({
   quantity: {
     required: true,
@@ -51,7 +53,7 @@ const orderSchema = new mongoose.Schema(
       required: true,
     },
     date: {
-      required: true,
+      // required: true,
       type: Date,
     },
     time: {
@@ -77,5 +79,6 @@ const orderSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
 const orderModel = mongoose.model("order", orderSchema);
 module.exports = { orderModel };

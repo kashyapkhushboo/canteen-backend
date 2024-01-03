@@ -86,7 +86,7 @@ const addOrder = async (req, res) => {
         orderData.bill_status = "unpaid";
 
         const today = new Date();
-        orderData.date = moment(today).format("MM-DD-YYYY").toString();
+        orderData.date = moment(today).format("MM-DD-YYYY");
 
         const newOrder = new orderModel(orderData);
         let result = await newOrder.save();
@@ -162,7 +162,7 @@ const addOrder = async (req, res) => {
         orderData.bill_status = "unpaid";
 
         const today = new Date();
-        orderData.date = moment(today).format("MM-DD-YYYY").toString();
+        orderData.date = moment(today).format("MM-DD-YYYY");
 
         const newOrder = new orderModel(orderData);
         const io = req.io;
@@ -274,7 +274,6 @@ const updateStatus = async (req, res) => {
         }
 
         const io = req.io;
-        console.log("Global socketIds:", global.socketIds);
 
         const targetSockets = global.socketIds.filter(
           (entry) => entry.userId == empDetails.EmployeeId
@@ -323,7 +322,6 @@ const updateStatus = async (req, res) => {
         await orderModel.findByIdAndUpdate(order_id, { order_status: status });
 
         const io = req.io;
-        console.log("Global socketIds:", global.socketIds);
 
         const targetSockets = global.socketIds.filter(
           (entry) => entry.userId == empDetails.EmployeeId
@@ -409,7 +407,7 @@ const pendingOrderList = async (req, res) => {
 
     const totalPages = Math.ceil(totalRecords / limit);
 
-    const pendingOrder = await orderModel
+    const orders = await orderModel
       .find({
         order_status: orderStatus,
         date: today,
@@ -423,6 +421,9 @@ const pendingOrderList = async (req, res) => {
       date: { $lt: today }, // Match dates smaller than "28-10-023"
       order_status: "pending", // Match status equal to "pending"
     });
+
+    let pendingOrder = JSON.parse(JSON.stringify(orders));
+    pendingOrder.forEach(item => item.date = moment(item.date).format("MM-DD-YYYY"))
 
     return res.status(200).json({
       statusCode: 200,
@@ -470,8 +471,6 @@ const listOrder = async (req, res) => {
       };
     }
 
-    console.log("Date interval: ", req.query.dateInterval);
-
     // Date interval filtering
     if (req.query.dateInterval) {
       const [startDateStr, endDateStr] = req.query.dateInterval.split("to");
@@ -479,77 +478,81 @@ const listOrder = async (req, res) => {
       const endDate = moment(endDateStr, "MM-DD-YYYY").endOf("day");
       query.date = {
         $gte: moment(startDate).format("MM-DD-YYYY"),
-        // $lte: moment(endDate).format("MM-DD-YYYY"),
+        $lte: moment(endDate).format("MM-DD-YYYY"),
       };
     }
-
-    console.log("Query: ", query);
 
     const totalRecords = await orderModel.countDocuments(query);
 
     // Use totalRecords as the limit when downloading in Excel format
-    const items = await orderModel
-      .find(query)
-      .sort({ createdAt: -1 })
-      .skip(
-        (currentPage - 0) *
-          (req.query.download === "excel" ? totalRecords : limit)
+
+    
+    const fetchedItems = await orderModel
+    .find(query)
+    .sort({ createdAt: -1 })
+    .skip(
+      (currentPage - 0) *
+      (req.query.download === "excel" ? totalRecords : limit)
       )
       .limit(req.query.download === "excel" ? totalRecords : limit);
-
-    if (items.length === 0) {
-      return res.status(400).json({
-        statusCode: 400,
-        success: false,
-        message: "No items found matching the search criteria.",
-        data: [],
-      });
-    }
-    // If a download query parameter is present, trigger Excel download
-    if (req.query.download === "excel") {
-      const workbook = new Excel.Workbook();
-      const worksheet = workbook.addWorksheet("Orders");
-
-      // Add headers to the worksheet
-      worksheet.addRow([
-        "Sr No.",
-        "Order ID",
-        "EmployeeId",
-        "Full Name",
-        "Bill Status",
-        "Order Status",
-        "Date",
-        "Total Balance",
-      ]);
-
-      // Add data to the worksheet
-      items.forEach((order, index) => {
+      
+      items = JSON.parse(JSON.stringify(fetchedItems));
+      
+      if (items.length === 0) {
+        return res.status(400).json({
+          statusCode: 400,
+          success: false,
+          message: "No items found matching the search criteria.",
+          data: [],
+        });
+      }
+      // If a download query parameter is present, trigger Excel download
+      items.forEach(item => item.date = moment(item.date).format("MM-DD-YYYY"))
+      if (req.query.download === "excel") {
+        const workbook = new Excel.Workbook();
+        const worksheet = workbook.addWorksheet("Orders");
+        
+        // Add headers to the worksheet
         worksheet.addRow([
-          index + 1,
-          order._id.toString().replace(/,/g, ""),
-          order.emp_id,
-          order.fullName,
-          order.bill_status,
-          order.order_status,
-          order.date,
-          order.totalBalance,
+          "Sr No.",
+          "Order ID",
+          "EmployeeId",
+          "Full Name",
+          "Bill Status",
+          "Order Status",
+          "Date",
+          "Total Balance",
         ]);
-      });
-
-      worksheet.getRow(1).eachCell((cell) => {
+        
+        // Add data to the worksheet
+        items.forEach((order, index) => {
+          worksheet.addRow([
+            index + 1,
+            order._id.toString().replace(/,/g, ""),
+            order.emp_id,
+            order.fullName,
+            order.bill_status,
+            order.order_status,
+            order.date,
+            order.totalBalance,
+          ]);
+        });
+        
+        worksheet.getRow(1).eachCell((cell) => {
         cell.fill = {
           type: "pattern",
           pattern: "solid",
           fgColor: { argb: "FFFF00" }, // 'FFFF00' is the hex code for yellow
         };
       });
-
+      
       // Set the height of rows (adjust as needed)
       worksheet.getRow(1).height = 30; // Set the height of the header row
       items.forEach((order, index) => {
         worksheet.getRow(index + 2).height = 20; // Set the height of other rows
       });
-
+      
+      
       // Set the width of columns (adjust as needed)
       worksheet.getColumn("A").width = 7;
       worksheet.getColumn("B").width = 30; //orderId
@@ -559,34 +562,34 @@ const listOrder = async (req, res) => {
       worksheet.getColumn("F").width = 15; //OSTATUS
       worksheet.getColumn("G").width = 15; //date
       worksheet.getColumn("H").width = 15; //TBALACE
-
+      
       worksheet.eachRow({ includeEmpty: true }, (row) => {
         row.alignment = { vertical: "middle", horizontal: "center" };
       });
-
+      
       // Set response headers for Excel file download
       res.setHeader(
         "Content-Type",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-      );
-      res.setHeader(
-        "Content-Disposition",
-        "attachment; filename=order_list.xlsx"
-      );
-
-      // Write the workbook to the response
-      await workbook.xlsx.write(res);
-
-      // End the response
-      res.end();
-    } else {
-      // Return the regular JSON response if the download query parameter is not present
-      return res.status(200).json({
-        statusCode: 200,
-        success: true,
-        message: "Order list fetched successfully.",
-        data: items,
-        currentPage,
+        );
+        res.setHeader(
+          "Content-Disposition",
+          "attachment; filename=order_list.xlsx"
+          );
+          
+          // Write the workbook to the response
+          await workbook.xlsx.write(res);
+          
+          // End the response
+          res.end();
+        } else {
+          // Return the regular JSON response if the download query parameter is not present
+          return res.status(200).json({
+            statusCode: 200,
+            success: true,
+            message: "Order list fetched successfully.",
+            data: items,
+            currentPage,
         totalRecords,
         limit,
       });
